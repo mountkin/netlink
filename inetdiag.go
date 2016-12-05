@@ -68,6 +68,10 @@ type InetDiagSockId struct {
 	IDiagCookie [2]uint32
 }
 
+func ntohs(n be16) int {
+	return int(n[1]) + int(n[0])<<8
+}
+
 func (id *InetDiagSockId) SrcIPv4() net.IP {
 	return ipv4(id.IDiagSrc[0])
 }

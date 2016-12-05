@@ -20,7 +20,7 @@ type NetlinkSocket struct {
 }
 
 func NewNetlinkSocket(protocol NetlinkProtocol, groups uint32) (*NetlinkSocket, error) {
-	fd, err := syscall.Socket(syscall.AF_NETLINK, syscall.SOCK_RAW, int(protocol))
+	fd, err := syscall.Socket(syscall.AF_NETLINK, syscall.SOCK_DGRAM, int(protocol))
 	if err != nil {
 		return nil, err
 	}
