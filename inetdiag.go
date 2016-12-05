@@ -3,7 +3,6 @@ package netlink
 import (
 	"fmt"
 	"net"
-	"os"
 	"syscall"
 	"unsafe"
 
@@ -140,7 +139,7 @@ func ipv6(original [4]be32) net.IP {
 }
 
 func (id *InetDiagSockId) String() string {
-	return fmt.Sprintf("%s:%d -> %s:%d", id.SrcIP().String(), id.IDiagSPort, id.DstIP().String(), id.IDiagDPort)
+	return fmt.Sprintf("%s:%d -> %s:%d", id.SrcIP().String(), id.SrcPort(), id.DstIP().String(), id.DstPort())
 }
 
 type InetDiagReqV2 struct {
@@ -189,14 +188,6 @@ func ParseInetDiagMsg(data []byte) *InetDiagMsg {
 	return (*InetDiagMsg)(unsafe.Pointer(&data[0]))
 }
 
-func NewNetlinkRequest() *nl.NetlinkRequest {
-	return &nl.NetlinkRequest{
-		NlMsghdr: syscall.NlMsghdr{
-			Len:   uint32(0),
-			Type:  uint16(syscall.NLMSG_DONE),
-			Flags: uint16(0),
-			Seq:   uint32(0),
-			Pid:   uint32(os.Getpid()),
-		},
-	}
+func NewInetDiagRequest() *nl.NetlinkRequest {
+	return nl.NewNetlinkRequest(SOCK_DIAG_BY_FAMILY, syscall.NLM_F_DUMP)
 }
