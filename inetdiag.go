@@ -3,8 +3,11 @@ package netlink
 import (
 	"fmt"
 	"net"
+	"os"
 	"syscall"
 	"unsafe"
+
+	"github.com/vishvananda/netlink/nl"
 )
 
 const (
@@ -12,7 +15,6 @@ const (
 )
 
 const (
-	TCPDIAG_GETSOCK     = 18 // linux/inet_diag.h
 	SOCK_DIAG_BY_FAMILY = 20 // linux/sock_diag.h
 )
 
@@ -96,6 +98,14 @@ func (id *InetDiagSockId) DstIP() net.IP {
 	return ip(id.IDiagDst)
 }
 
+func (id *InetDiagSockId) SrcPort() int {
+	return ntohs(id.IDiagSPort)
+}
+
+func (id *InetDiagSockId) DstPort() int {
+	return ntohs(id.IDiagDPort)
+}
+
 func ip(bytes [4]be32) net.IP {
 	if isIpv6(bytes) {
 		return ipv6(bytes)
@@ -177,4 +187,16 @@ func (msg *InetDiagMsg) String() string {
 
 func ParseInetDiagMsg(data []byte) *InetDiagMsg {
 	return (*InetDiagMsg)(unsafe.Pointer(&data[0]))
+}
+
+func NewNetlinkRequest() *nl.NetlinkRequest {
+	return &nl.NetlinkRequest{
+		NlMsghdr: syscall.NlMsghdr{
+			Len:   uint32(0),
+			Type:  uint16(syscall.NLMSG_DONE),
+			Flags: uint16(0),
+			Seq:   uint32(0),
+			Pid:   uint32(os.Getpid()),
+		},
+	}
 }
